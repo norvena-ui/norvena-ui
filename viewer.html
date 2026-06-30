@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { margin:0; background:transparent; font-family:Arial,sans-serif; }
+    #viewer {
+      width:100vw; height:100vh;
+      background-size:contain;
+      background-repeat:no-repeat;
+      background-position:center;
+      cursor:grab;
+      touch-action:none;
+    }
+    #hint {
+      position:absolute; bottom:18px; left:0; right:0;
+      text-align:center; color:#777; font-size:14px;
+      pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="viewer"></div>
+<div id="hint">Drag or swipe to rotate</div>
+
+<script>
+const totalFrames = 72;
+const baseUrl = "https://norvena-ui.github.io/norvena-ui/assets/360/display-case-white/";
+
+let frame = 1;
+let dragging = false;
+let lastX = 0;
+
+const viewer = document.getElementById("viewer");
+
+function imgUrl(n) {
+  return baseUrl + String(n).padStart(4, "0") + ".png";
+}
+
+function showFrame(n) {
+  frame = ((n - 1 + totalFrames) % totalFrames) + 1;
+  viewer.style.backgroundImage = `url("${imgUrl(frame)}")`;
+}
+
+for (let i = 1; i <= totalFrames; i++) {
+  const img = new Image();
+  img.src = imgUrl(i);
+}
+
+showFrame(1);
+
+viewer.addEventListener("pointerdown", e => {
+  dragging = true;
+  lastX = e.clientX;
+  viewer.setPointerCapture(e.pointerId);
+});
+
+viewer.addEventListener("pointerup", () => dragging = false);
+viewer.addEventListener("pointercancel", () => dragging = false);
+
+viewer.addEventListener("pointermove", e => {
+  if (!dragging) return;
+  const dx = e.clientX - lastX;
+
+  if (Math.abs(dx) > 8) {
+    showFrame(frame + (dx > 0 ? -1 : 1));
+    lastX = e.clientX;
+  }
+});
+</script>
+
+</body>
+</html>
